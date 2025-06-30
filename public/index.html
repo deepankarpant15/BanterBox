@@ -1,0 +1,258 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Room-based Chat App</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #e2e8f0;
+        color: #334155;
+      }
+      .chat-container {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        width: 90%;
+        max-width: 700px;
+        display: flex;
+        flex-direction: row;
+        gap: 1.5rem;
+      }
+      .chat-main {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      h1 {
+        color: #4f46e5;
+        text-align: center;
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+      #currentRoomDisplay {
+        font-size: 1.25rem;
+        font-weight: 600;
+        text-align: center;
+        color: #3b82f6;
+        margin-bottom: 0.5rem;
+      }
+      #messages {
+        flex-grow: 1;
+        border: 1px solid #cbd5e1;
+        padding: 1rem;
+        min-height: 200px;
+        max-height: 400px;
+        overflow-y: auto;
+        background-color: #f8fafc;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .message {
+        background-color: #eff6ff;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        word-wrap: break-word;
+      }
+      .message.system {
+        background-color: #fefce8;
+        color: #b45309;
+        font-style: italic;
+        text-align: center;
+      }
+      .message .username {
+        font-weight: bold;
+        color: #3b82f6;
+        margin-right: 0.5rem;
+      }
+      form {
+        display: flex;
+        gap: 0.75rem;
+      }
+      form input[type="text"] {
+        flex-grow: 1;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+      }
+      form button {
+        background-color: #4f46e5;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      form button:hover {
+        background-color: #4338ca;
+      }
+
+      /* User List Styling */
+      .user-list-container {
+        width: 200px;
+        background-color: #f0f4f8;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .user-list-container h3 {
+        text-align: center;
+        color: #475569;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+      }
+      #onlineUsers {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        max-height: 450px;
+        overflow-y: auto;
+      }
+      #onlineUsers li {
+        background-color: #e0e7ff;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #3730a3;
+        display: flex;
+        align-items: center;
+      }
+      #onlineUsers li::before {
+        content: "•";
+        color: #22c55e;
+        margin-right: 0.5rem;
+        font-size: 1.5em;
+        line-height: 1;
+      }
+
+      /* Typing Indicator Styling */
+      #typingIndicator {
+        min-height: 1.5rem; /* Reserve space to prevent layout shift */
+        font-style: italic;
+        color: #64748b; /* Tailwind slate-500 */
+        text-align: left;
+        margin-top: -0.5rem; /* Adjust spacing */
+        padding-left: 1rem;
+      }
+
+      /* Overlay for username and room prompt */
+      .username-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .username-prompt {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .username-prompt input {
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+      }
+      .username-prompt button {
+        background-color: #22c55e;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+      }
+      .username-prompt button:hover {
+        background-color: #16a34a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-main">
+        <h1>Simple Chat</h1>
+        <div id="currentRoomDisplay"></div>
+        <div id="messages"></div>
+        <!-- NEW: Typing indicator div -->
+        <div id="typingIndicator"></div>
+        <form id="messageForm">
+          <input
+            id="m"
+            autocomplete="off"
+            placeholder="Type your message..."
+          /><button type="submit">Send</button>
+        </form>
+      </div>
+
+      <div class="user-list-container">
+        <h3>Online Users</h3>
+        <ul id="onlineUsers">
+          <!-- Online users will be listed here -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Username and Room Prompt Overlay -->
+    <div class="username-overlay" id="usernameOverlay">
+      <div class="username-prompt">
+        <h2>Join Chat Room</h2>
+        <input
+          type="text"
+          id="usernameInput"
+          placeholder="Enter your username"
+          maxlength="15"
+        />
+        <input
+          type="text"
+          id="roomInput"
+          placeholder="Enter room name (e.g., general)"
+          value="general"
+          maxlength="20"
+        />
+        <button id="setUsernameBtn">Join Chat</button>
+      </div>
+    </div>
+
+    <!-- Include the Socket.IO client-side library -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Link to our separate client-side JavaScript file -->
+    <script src="client.js"></script>
+  </body>
+</html>
