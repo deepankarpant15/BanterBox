@@ -1,6 +1,6 @@
 # BanterBox
 
-A real-time chat application built with Node.js, Express, Socket.IO, and MongoDB. This application allows users to join different chat rooms and communicate instantly.
+A real-time room based chat application built with Node.js, Express, Socket.IO, and MongoDB. This application allows users to join different chat rooms and communicate instantly.
 
 ## Features
 
